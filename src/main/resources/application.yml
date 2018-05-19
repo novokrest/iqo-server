@@ -1,0 +1,14 @@
+server:
+  port: 30005
+
+flyway:
+  locations: sql
+
+spring:
+  datasource:
+    driverClassName: org.sqlite.JDBC
+    url: jdbc:sqlite:app.db
+
+logging:
+  level:
+    root: INFO
