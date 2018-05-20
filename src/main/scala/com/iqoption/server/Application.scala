@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Import
 @SpringBootApplication
 class Application
 
-object Application extends App {
-  SpringApplication.run(classOf[Application])
+object Application {
+  def main(args: Array[String]): Unit = {
+    SpringApplication.run(classOf[Application], args: _*)
+  }
 }
