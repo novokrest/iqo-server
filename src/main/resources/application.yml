@@ -8,6 +8,9 @@ spring:
   datasource:
     driverClassName: org.sqlite.JDBC
     url: jdbc:sqlite:app.db
+    tomcat:
+      max-active: 1
+      default-auto-commit: false
 
 logging:
   level:
