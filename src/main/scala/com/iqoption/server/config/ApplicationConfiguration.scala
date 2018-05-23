@@ -3,17 +3,20 @@ package com.iqoption.server.config
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.iqoption.server.process.{StatCommand, UserCommand, VisitController}
 import com.iqoption.server.services.UserService
-import org.springframework.context.annotation.{Bean, Configuration}
+import org.springframework.context.annotation.{Bean, Configuration, Import}
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.support.TransactionTemplate
 
+@Import(value = Array(classOf[StorageConfiguration]))
 @Configuration
 class ApplicationConfiguration {
 
   @Bean
-  def userService(jdbcTemplate: JdbcTemplate, txTemplate: TransactionTemplate): UserService = {
-    new UserService(jdbcTemplate, txTemplate)
+  def userService(masterJdbcTemplate: JdbcTemplate,
+                  masterTransactionTemplate: TransactionTemplate,
+                  slaveJdbcTemplate: JdbcTemplate): UserService = {
+    new UserService(masterJdbcTemplate, masterTransactionTemplate, slaveJdbcTemplate)
   }
 
   @Bean

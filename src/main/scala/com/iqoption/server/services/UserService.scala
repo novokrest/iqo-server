@@ -4,7 +4,9 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.support.TransactionTemplate
 
-class UserService(jdbcTemplate: JdbcTemplate, txTemplate: TransactionTemplate) {
+class UserService(masterJdbcTemplate: JdbcTemplate,
+                  masterTxTemplate: TransactionTemplate,
+                  slaveJdbcTemplate: JdbcTemplate) {
 
   def addUser(userName: String): Unit = {
     if (isNewUser(userName)) {
@@ -16,12 +18,13 @@ class UserService(jdbcTemplate: JdbcTemplate, txTemplate: TransactionTemplate) {
   }
 
   private def isNewUser(userName: String): Boolean = {
-    jdbcTemplate.queryForObject("SELECT COUNT(1) FROM user WHERE name = ?", classOf[Int], userName) == 0
+    slaveJdbcTemplate.queryForObject("SELECT COUNT(1) FROM user WHERE name = ?", classOf[Int], userName) == 0
   }
 
   private def storeUser(userName: String): Unit = {
     UserService.log.info("Try to store new user: user={}", userName)
-    val updateCount: Int = txTemplate.execute(_ => jdbcTemplate.update(s"INSERT OR REPLACE INTO user (name) VALUES (?)", userName))
+    val updateCount: Int = masterTxTemplate.execute(_ =>
+        masterJdbcTemplate.update(s"INSERT OR REPLACE INTO user (name) VALUES (?)", userName))
     if (updateCount == 1) {
       UserService.log.info("User was stored: user={}", userName)
     } else {
@@ -30,7 +33,7 @@ class UserService(jdbcTemplate: JdbcTemplate, txTemplate: TransactionTemplate) {
   }
 
   def getUsersCount(): Int = {
-    val usersCount = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM user", classOf[Int])
+    val usersCount = slaveJdbcTemplate.queryForObject("SELECT COUNT(1) FROM user", classOf[Int])
     UserService.log.debug("There are the following number of users: count={}", usersCount)
     usersCount
   }

@@ -5,12 +5,20 @@ flyway:
   locations: sql
 
 spring:
-  datasource:
+  masterDataSource:
     driverClassName: org.sqlite.JDBC
     url: jdbc:sqlite:app.db
-    tomcat:
-      max-active: 1
-      default-auto-commit: false
+    initial-size: 1
+    max-active: 1
+    max-wait: 25000
+    default-auto-commit: false
+
+  slaveDataSource:
+    driverClassName: org.sqlite.JDBC
+    url: jdbc:sqlite:app.db
+    initial-size: 10
+    max-active: 100
+    max-wait: 10000
 
 logging:
   level:
